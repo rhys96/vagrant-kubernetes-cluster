@@ -1,0 +1,14 @@
+---
+
+- hosts: master
+  become: yes
+  roles:
+    - common
+    - k8s-master
+    - helm
+
+- hosts: node*
+  become: yes
+  roles:
+    - common
+    - k8s-node

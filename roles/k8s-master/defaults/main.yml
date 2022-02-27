@@ -1,0 +1,4 @@
+---
+
+# Set to false if vagrant provisioning is not used
+vagrant_execution: true

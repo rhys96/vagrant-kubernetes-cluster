@@ -1,0 +1,13 @@
+---
+
+- name: Join the node to cluster
+  command: hostvars['{{ k8s_master_hostname }}']['join_command']
+  when: not vagrant_execution
+
+- name: Copy the join command to server location
+  copy: src=join-command dest=/tmp/join-command.sh mode=0777
+  when: vagrant_execution
+
+- name: Join the node to cluster
+  command: sh /tmp/join-command.sh
+  when: vagrant_execution

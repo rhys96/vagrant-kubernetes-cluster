@@ -1,0 +1,22 @@
+---
+
+- name: Install dependencies for Helm
+  apt:
+    name: "{{ helm_dependencies }}"
+    state: present
+
+- name: Add an apt signing key for Helm
+  apt_key:
+    url: https://baltocdn.com/helm/signing.asc
+    state: present
+
+- name: Add apt repository for Helm
+  apt_repository:
+    repo: deb https://baltocdn.com/helm/stable/debian/ all main
+    state: present
+    filename: helm-stable-debian.list
+
+- name: Install Helm
+  apt:
+    name: helm
+    state: present

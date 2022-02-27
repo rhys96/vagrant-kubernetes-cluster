@@ -1,0 +1,6 @@
+---
+# The value of k8s_master_hostname must match the hostname entry in the inventory
+k8s_master_hostname: master
+
+# Set to false if vagrant provisioning is not used
+vagrant_execution: true

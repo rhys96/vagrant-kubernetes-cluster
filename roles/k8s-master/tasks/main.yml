@@ -1,0 +1,53 @@
+---
+
+- name: Check if kubeconfig exists
+  stat:
+    path: /etc/kubernetes/admin.conf
+  register: kubeconfig
+
+- name: Initialize the Kubernetes cluster using kubeadm
+  command: kubeadm init --apiserver-advertise-address="{{ node_ip }}" --apiserver-cert-extra-sans="{{ node_ip }}"  --node-name {{ ansible_hostname }} --pod-network-cidr=172.16.0.0/16
+  when: not kubeconfig.stat.exists
+
+- name: Create .kube directory for local user
+  file:
+    path: /home/vagrant/.kube
+    state: directory
+
+- name: Copy Kubernetes config file to local user
+  copy:
+    src: /etc/kubernetes/admin.conf
+    dest: /home/vagrant/.kube/config
+    remote_src: yes
+
+- name: Change ownership of Kubernetes config file to local user
+  file:
+    path: /home/vagrant/.kube/config
+    owner: vagrant
+    group: vagrant
+
+- name: Check if Calico has been installed
+  become: false
+  shell: kubectl get pods -A | grep -q calico
+  register: calico_installed
+  ignore_errors: yes
+
+- name: Install Calico pod network
+  become: false
+  command: kubectl create -f https://projectcalico.docs.tigera.io/manifests/calico.yaml
+  when: calico_installed.rc != 0
+
+- name: Generate join command
+  command: kubeadm token create --print-join-command
+  register: command
+
+- name: Share join command
+  set_fact:
+    join_command: command.stdout_lines[0]
+ 
+- name: Copy join command to local file
+  become: false
+  local_action: copy content="{{ command.stdout_lines[0] }}" dest="./join-command"
+  when: vagrant_execution
+
+
