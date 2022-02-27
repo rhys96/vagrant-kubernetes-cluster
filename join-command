@@ -1,1 +1,0 @@
-kubeadm join 192.168.33.10:6443 --token dbm72w.4dhfat50aunwl6r7 --discovery-token-ca-cert-hash sha256:46af38f75c20150ab21bbfbb09acd47b7d44384564528499cbe141d9249ed4d5 
