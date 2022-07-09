@@ -1,5 +1,23 @@
 ---
 
+- name: Check if kubeconfig exists
+  stat:
+    path: /etc/kubernetes/admin.conf
+  register: kubeconfig
+
+# See https://github.com/containerd/containerd/issues/4581
+- name: Remove containerd config.toml
+  file:
+    path: /etc/containerd/config.toml
+    state: absent
+  when: not kubeconfig.stat.exists
+
+- name: Restart containerd service
+  service:
+    name: containerd
+    state: restarted
+  when: not kubeconfig.stat.exists
+
 - name: Join the node to cluster
   command: hostvars['{{ k8s_master_hostname }}']['join_command']
   when: not vagrant_execution

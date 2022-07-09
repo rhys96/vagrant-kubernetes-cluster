@@ -5,6 +5,19 @@
     path: /etc/kubernetes/admin.conf
   register: kubeconfig
 
+# See https://github.com/containerd/containerd/issues/4581
+- name: Remove containerd config.toml
+  file:
+    path: /etc/containerd/config.toml
+    state: absent
+  when: not kubeconfig.stat.exists
+
+- name: Restart containerd service
+  service:
+    name: containerd
+    state: restarted
+  when: not kubeconfig.stat.exists
+
 - name: Initialize the Kubernetes cluster using kubeadm
   command: kubeadm init --apiserver-advertise-address="{{ node_ip }}" --apiserver-cert-extra-sans="{{ node_ip }}"  --node-name {{ ansible_hostname }} --pod-network-cidr=172.16.0.0/16
   when: not kubeconfig.stat.exists
